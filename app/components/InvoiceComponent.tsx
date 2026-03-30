@@ -67,29 +67,26 @@ const InvoiceComponent: React.FC<InvoiceComponentProps> = ({ invoice, index }) =
     return totalHT + totalVAT
   }
   return (
-    <div className='bg-base-200/90 p-5 rounded-xl space-y-2 shadow'>
-      <div className='flex justify-between items-center w-full'>
-        <div>{getStatusBadge(invoice.status)}</div>
-        <Link href={`/invoice/${invoice.id}`}
-          className='btn btn-accent btn-sm'
-        >
-          Plus
-          <SquareArrowOutUpRight />
-        </Link>
-      </div>
-      <div className='w-full'>
-        <div>
-          <div className="stat-title">
-            <div className='uppercase text-sm'>FACT-{invoice.id}</div>
-          </div>
+    <div className='bg-base-200/90 p-4 md:p-5 rounded-xl space-y-2 shadow hover:shadow-lg transition-shadow cursor-pointer'>
+      <Link href={`/invoice/${invoice.id}`} className="block">
+        <div className='flex justify-between items-center w-full'>
+          <div>{getStatusBadge(invoice.status)}</div>
+          <SquareArrowOutUpRight className="w-5 text-accent" />
+        </div>
+        <div className='w-full'>
           <div>
-            <div className="stat-value">{calculateTotal().toFixed(2)} £ </div>
-          </div>
-          <div className="stat-desc">
-            {invoice.name}
+            <div className="stat-title">
+              <div className='uppercase text-sm'>FACT-{invoice.id}</div>
+            </div>
+            <div>
+              <div className="stat-value text-xl md:text-2xl">{calculateTotal().toFixed(2)} £ </div>
+            </div>
+            <div className="stat-desc truncate">
+              {invoice.name}
+            </div>
           </div>
         </div>
-      </div>
+      </Link>
     </div>
   )
 }
