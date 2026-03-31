@@ -1,12 +1,11 @@
 "use client"
-import Image from "next/image";
 import Wrapper from "./components/Wrapper";
 import { Layers, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createEmptyInvoice, getInvoiceByEmail, deleteInvoice } from "./actions";
 import { useUser } from "@clerk/nextjs";
 import confetti from "canvas-confetti"
-import { Invoice } from "@/type";
+import { Invoice, AppError } from "@/type";
 import InvoiceComponent from "./components/InvoiceComponent";
 
 export default function Home() {
@@ -34,11 +33,32 @@ export default function Home() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
 
 
+  // la fonction qui appelle a l'action pour affiché les factures
+  const fetchInvoices = useCallback(async () =>{
+    try{
+      if(!email) return
+
+      setIsLoading(true)
+      setError("")
+
+      const data = await getInvoiceByEmail(email)
+      if(data)
+        setInvoices(data)
+
+    }catch(erreur: unknown){
+      const error = erreur as AppError;
+      console.error("Erreur lors du chargement des factures :", erreur)
+      setError(error.message || "Erreur lors du chargement des factures")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [email])
+
   useEffect(()=>{
     if(email){
       fetchInvoices()
     }
-  },[email])
+  },[email, fetchInvoices])
 
   // la fonction qui appelle a l'action pour creer une facture
   const handleCreateInvoice = async () =>{
@@ -94,34 +114,15 @@ export default function Home() {
       // Masquer le message de succès après 3 secondes
       setTimeout(() => setSuccessMessage(""), 3000)
 
-    }catch(erreur: any){
+    }catch(erreur: unknown){
       console.error("Erreur lors de la création de la facture :", erreur)
-      setError(erreur.message || "Erreur lors de la création de la facture")
+      setError((erreur as AppError).message || "Erreur lors de la création de la facture")
     } finally {
       setIsLoading(false)
     }
   }
 
   // la fonction qui appelle a l'action pour affiché les factures
-  const fetchInvoices = async () =>{
-    try{
-      if(!email) return
-
-      setIsLoading(true)
-      setError("")
-
-      const data = await getInvoiceByEmail(email)
-      if(data)
-        setInvoices(data)
-
-    }catch(erreur: any){
-      console.error("Erreur lors du chargement des factures :", erreur)
-      setError(erreur.message || "Erreur lors du chargement des factures")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   // Supprimer une facture
   const handleDeleteInvoice = async (invoiceId: string) => {
     if(!confirm("Êtes-vous sûr de vouloir supprimer cette facture ?")) {
@@ -144,9 +145,9 @@ export default function Home() {
       // Masquer le message de succès après 3 secondes
       setTimeout(() => setSuccessMessage(""), 3000)
 
-    }catch(erreur: any){
+    }catch(erreur: unknown){
       console.error("Erreur lors de la suppression de la facture :", erreur)
-      setError(erreur.message || "Erreur lors de la suppression de la facture")
+      setError((erreur as AppError).message || "Erreur lors de la suppression de la facture")
     } finally {
       setIsLoading(false)
     }
@@ -244,7 +245,7 @@ export default function Home() {
           <div className="text-center py-12 text-base-content/50">
             <Layers className="w-16 h-16 mx-auto mb-4 opacity-50"/>
             <p>Aucune facture trouvée</p>
-            <p className="text-sm mt-2">Créez votre première facture en cliquant sur le bouton "Nouvelle facture"</p>
+            <p className="text-sm mt-2">Créez votre première facture en cliquant sur le bouton &quot;Nouvelle facture&quot;</p>
           </div>
         )}
 
@@ -257,7 +258,7 @@ export default function Home() {
               >
                 <Trash2 className="w-3"/>
               </button>
-              <InvoiceComponent invoice={invoice} index={0}/>
+              <InvoiceComponent invoice={invoice} />
             </div>
           ))}
         </div>
@@ -293,7 +294,7 @@ export default function Home() {
                 <h4 className="font-semibold text-accent">Émetteur</h4>
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text">Nom de l'émetteur</span>
+                    <span className="label-text">Nom de l&apos;émetteur</span>
                   </label>
                   <input
                     type="text"
@@ -305,7 +306,7 @@ export default function Home() {
                 </div>
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text">Adresse de l'émetteur</span>
+                    <span className="label-text">Adresse de l&apos;émetteur</span>
                   </label>
                   <textarea
                     placeholder="Votre adresse"
@@ -359,7 +360,7 @@ export default function Home() {
                 </div>
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text">Date d'échéance</span>
+                    <span className="label-text">Date d&apos;échéance</span>
                   </label>
                   <input
                     type="date"

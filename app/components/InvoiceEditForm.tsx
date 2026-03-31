@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { updateInvoice, updateInvoiceStatus } from '@/app/actions'
-import { Invoice } from '@/type'
-import { Save, X, Plus, Trash2 } from 'lucide-react'
+import { updateInvoice } from '@/app/actions'
+import { Invoice, AppError } from '@/type'
+import { Save, X} from 'lucide-react'
 
 type InvoiceEditFormProps = {
   invoice: Invoice
@@ -26,13 +26,6 @@ const InvoiceEditForm: React.FC<InvoiceEditFormProps> = ({ invoice, email, onSav
     status: invoice.status
   })
 
-  const [newLine, setNewLine] = useState({
-    description: '',
-    quantity: 1,
-    unitPrice: 0
-  })
-
-  const [lines, setLines] = useState(invoice.lines || [])
   const [error, setError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
@@ -44,32 +37,6 @@ const InvoiceEditForm: React.FC<InvoiceEditFormProps> = ({ invoice, email, onSav
       ...editedInvoice,
       [name]: type === 'checkbox' ? checked : type === 'number' ? parseFloat(value) || 0 : value
     })
-  }
-
-  const handleAddLine = () => {
-    if (!newLine.description) {
-      setError('La description de la ligne est requise')
-      return
-    }
-
-    const tempLine = {
-      id: Date.now().toString(), // ID temporaire pour le frontend
-      ...newLine
-    }
-
-    setLines([...lines, tempLine])
-    setNewLine({ description: '', quantity: 1, unitPrice: 0 })
-    setError('')
-  }
-
-  const handleRemoveLine = (lineId: string) => {
-    setLines(lines.filter(line => line.id !== lineId))
-  }
-
-  const handleUpdateLine = (lineId: string, field: string, value: any) => {
-    setLines(lines.map(line =>
-      line.id === lineId ? { ...line, [field]: value } : line
-    ))
   }
 
   const handleSubmit = async () => {
@@ -108,27 +75,14 @@ const InvoiceEditForm: React.FC<InvoiceEditFormProps> = ({ invoice, email, onSav
       // Pour l'instant, on sauvegarde seulement les informations de base de la facture
 
       onSave()
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de la mise à jour')
+    } catch (err: unknown) {
+      const error = err as AppError;
+      setError(error.message || 'Erreur lors de la mise à jour');
     } finally {
       setIsSaving(false)
     }
   }
 
-  const calculateTotal = () => {
-    const totalHT = lines.reduce((acc, line) => {
-      const quantity = line.quantity ?? 0;
-      const unitPrice = line.unitPrice ?? 0;
-      return acc + quantity * unitPrice
-    }, 0)
-
-    const totalVAT = editedInvoice.vatActive ? totalHT * (editedInvoice.vatRate / 100) : 0
-    const totalTTC = totalHT + totalVAT
-
-    return { totalHT, totalVAT, totalTTC }
-  }
-
-  const { totalHT, totalVAT, totalTTC } = calculateTotal()
 
   return (
     <div className="space-y-6">
@@ -192,7 +146,7 @@ const InvoiceEditForm: React.FC<InvoiceEditFormProps> = ({ invoice, email, onSav
           <div className="space-y-4">
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Nom de l'émetteur</span>
+                <span className="label-text">Nom de l&apos;émetteur</span>
               </label>
               <input
                 type="text"
@@ -204,7 +158,7 @@ const InvoiceEditForm: React.FC<InvoiceEditFormProps> = ({ invoice, email, onSav
             </div>
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Adresse de l'émetteur</span>
+                <span className="label-text">Adresse de l&apos;émetteur</span>
               </label>
               <textarea
                 name="issuerAddress"
@@ -265,7 +219,7 @@ const InvoiceEditForm: React.FC<InvoiceEditFormProps> = ({ invoice, email, onSav
           </div>
           <div className="form-control">
             <label className="label">
-              <span className="label-text">Date d'échéance</span>
+              <span className="label-text">Date d&apos;échéance</span>
             </label>
             <input
               type="date"

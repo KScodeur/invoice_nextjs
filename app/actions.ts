@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { randomBytes } from "crypto";
+import { InvoiceUpdateData, InvoiceLineCreateData, InvoiceLineUpdateData } from "@/type";
 
 // Creer l'user s'il n'existe pas déjà
 export async function checkAndAddUser(email: string, name: string){
@@ -261,7 +262,7 @@ export async function getInvoiceById(invoiceId: string, userEmail: string){
 }
 
 // Mettre à jour une facture avec contrôle d'accès
-export async function updateInvoice(invoiceId: string, userEmail: string, data: any){
+export async function updateInvoice(invoiceId: string, userEmail: string, data: Partial<InvoiceUpdateData>){
     try{
         if (!userEmail) {
             throw new Error("Email utilisateur manquant");
@@ -388,7 +389,7 @@ export async function updateInvoiceStatus(invoiceId: string, userEmail: string, 
 }
 
 // Ajouter une ligne de facturation
-export async function addInvoiceLine(invoiceId: string, userEmail: string, lineData: any){
+export async function addInvoiceLine(invoiceId: string, userEmail: string, lineData: InvoiceLineCreateData){
     try{
         if (!userEmail) {
             throw new Error("Email utilisateur manquant");
@@ -434,7 +435,7 @@ export async function addInvoiceLine(invoiceId: string, userEmail: string, lineD
 }
 
 // Mettre à jour une ligne de facturation
-export async function updateInvoiceLine(lineId: string, userEmail: string, lineData: any){
+export async function updateInvoiceLine(lineId: string, userEmail: string, lineData: Partial<InvoiceLineUpdateData>){
     try{
         if (!userEmail) {
             throw new Error("Email utilisateur manquant");

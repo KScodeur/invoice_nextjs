@@ -1,7 +1,7 @@
 'use client'
 
-import { getInvoiceById, updateInvoiceStatus } from '@/app/actions'
-import { Invoice } from '@/type'
+import { getInvoiceById } from '@/app/actions'
+import { Invoice, AppError } from '@/type'
 import React, { useEffect, useState } from 'react'
 import Wrapper from '@/app/components/Wrapper'
 import { CheckCircle, Clock, FileText, XCircle, ArrowLeft, Printer, Download, Edit, Trash2 } from 'lucide-react'
@@ -87,9 +87,9 @@ const InvoicePage = ({ params }: { params: Promise<{ invoiceId: string }> }) => 
         } else {
           throw new Error('Facture non trouvée')
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err)
-        setError(err.message || 'Erreur lors du chargement de la facture')
+        setError((err as AppError).message || 'Erreur lors du chargement de la facture')
       } finally {
         setIsLoading(false)
       }
@@ -128,9 +128,9 @@ const InvoicePage = ({ params }: { params: Promise<{ invoiceId: string }> }) => 
 
       await deleteInvoice(invoice?.id || '', email)
       window.location.href = '/'
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err)
-      setError(err.message || 'Erreur lors de la suppression de la facture')
+      setError((err as AppError).message || 'Erreur lors de la suppression de la facture')
     }
   }
 
@@ -283,7 +283,7 @@ const InvoicePage = ({ params }: { params: Promise<{ invoiceId: string }> }) => 
               <div className="font-semibold">{invoice.invoiceDate || 'Non spécifiée'}</div>
             </div>
             <div className="bg-base-300/50 p-4 rounded-lg">
-              <div className="text-sm text-base-content/70">Date d'échéance</div>
+              <div className="text-sm text-base-content/70">Date d&apos;échéance</div>
               <div className="font-semibold">{invoice.dueDate || 'Non spécifiée'}</div>
             </div>
           </div>
